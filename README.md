@@ -41,5 +41,36 @@ app/
 ## ⚙️ Установка
 
 ```bash
+git clone https://github.com/kod1984/tg-assistant
 python -m venv .venv
 pip install -r requirements.txt
+.venv/bin/python -m app.main
+
+## Запуск как демона 
+sudo nano /etc/systemd/system/tg-assistant.service
+[Unit]
+Description=Telegram Assistant
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/tg-assistant
+
+ExecStart=/opt/tg-assistant/.venv/bin/python -m app.main
+
+# ❌ ВАЖНО: никаких рестартов
+Restart=no
+
+# (опционально) чтобы лог был живой в journalctl
+StandardOutput=journal
+StandardError=journal
+
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo systemctl daemon-reload
+sudo systemctl start tg-assistant
+sudo systemctl status tg-assistant
