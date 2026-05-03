@@ -1,0 +1,9 @@
+.vscode
+.env
+.venv
+data/
+logs/
+__pycache__/
+*.pyc
+summury.txt
+summury.py
