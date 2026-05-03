@@ -17,8 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 def setup_logging():
-    log_dir = Path("logs")
-    log_dir.mkdir(parents=True, exist_ok=True)    
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -55,7 +53,11 @@ async def main():
         logger.info("Shutting down client")
         await client.disconnect()
 
+def ensure_dirs():
+    Path("logs").mkdir(exist_ok=True)
+    Path("data").mkdir(exist_ok=True)
 
 if __name__ == "__main__":
+    ensure_dirs()
     setup_logging()
     asyncio.run(main())
