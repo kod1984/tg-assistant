@@ -5,11 +5,12 @@ from pathlib import Path
 from telethon.errors import (
     SessionPasswordNeededError,
     PhoneCodeInvalidError,
+    SessionRevokedError,
 )
 
 from app.client import create_client
 from app.handlers import register_handlers
-from app.auth_guard import check_auth_block, create_auth_block
+from app.auth_guard import check_auth_block, create_auth_block, acquire_lock, release_lock
 from config.settings import get_settings
 
 
@@ -38,7 +39,7 @@ async def main():
 
     try:
         await client.start()
-    except (SessionPasswordNeededError, PhoneCodeInvalidError) as e:
+    except (SessionPasswordNeededError, PhoneCodeInvalidError, SessionRevokedError) as e:
         create_auth_block(str(e))
         logger.exception("Authentication failed")
         raise
@@ -49,6 +50,11 @@ async def main():
 
     try:
         await client.run_until_disconnected()
+    except SessionRevokedError as e:
+        create_auth_block(f"Session revoked: {e}")
+        logger.exception("Session revoked — blocking restart")
+        raise  # важно чтобы процесс умер        
+        
     finally:
         logger.info("Shutting down client")
         await client.disconnect()
@@ -58,6 +64,10 @@ def ensure_dirs():
     Path("data").mkdir(exist_ok=True)
 
 if __name__ == "__main__":
-    ensure_dirs()
-    setup_logging()
-    asyncio.run(main())
+    acquire_lock()
+    try:
+        ensure_dirs()
+        setup_logging()
+        asyncio.run(main())
+    finally:
+        release_lock()        
