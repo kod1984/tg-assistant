@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     active_hours_start: int = 9
     active_hours_end: int = 23
 
+    # --- ДОБАВЛЕНО: контроль реконнектов ---
+    reconnect_window_minutes: int = 10  # окно анализа
+    max_success_reconnects: int = 1     # >1 → стоп
+    max_failed_reconnects: int = 2      # >=2 → стоп
+    
     keywords: list[str] = Field(
         default_factory=lambda: [
             "lego",
@@ -28,7 +33,6 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8"
     )
 
-settings = Settings()
 
 @lru_cache
 def get_settings() -> Settings:
