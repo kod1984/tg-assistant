@@ -10,13 +10,28 @@ async def human_delay():
     await asyncio.sleep(random.uniform(3, 12))
 
 
+async def simulate_typing(client, target):
+    """
+    Безопасная имитация typing:
+    работает только если клиент поддерживает action()
+    """
+    if hasattr(client, "action"):
+        try:
+            async with client.action(target, "typing"):
+                await asyncio.sleep(random.uniform(2.5, 3.5))
+            return
+        except Exception as e:
+            logger.debug("Typing simulation failed: %s", e)
+
+    # fallback
+    await asyncio.sleep(random.uniform(2.5, 3.5))
+
+
 async def send_message_safe(client, target, text):
     await human_delay()
 
     try:
-        # --- typing simulation ---
-        async with client.action(target, "typing"):
-            await asyncio.sleep(random.uniform(2.5, 3.5))
+        await simulate_typing(client, target)
 
         await client.send_message(target, text)
         logger.info("Message sent to %s", target)
