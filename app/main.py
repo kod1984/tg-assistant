@@ -35,7 +35,11 @@ async def run_app():
 
 
 if __name__ == "__main__":
-    acquire_lock()
+    try:
+        acquire_lock()
+    except RuntimeError as e:
+        logger.error("Cannot start application: %s", e)
+        exit(1)  # Завершаем процесс если lock не удалось захватить
     try:
         ensure_dirs()
         setup_logging()
