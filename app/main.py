@@ -30,10 +30,11 @@ async def run_app():
 
 
 if __name__ == "__main__":
+    setup_logging()
+    ensure_dirs()
+
     try:
         acquire_lock()
-        ensure_dirs()
-        setup_logging()
         asyncio.run(run_app())
 
     finally:
