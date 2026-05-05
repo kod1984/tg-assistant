@@ -1,8 +1,11 @@
 from telethon import events
+import logging
 
 from app.filters import match_keywords
 from app.sender import send_message_safe
 from app.scheduler import is_active_time
+
+logger = logging.getLogger(__name__)
 
 
 def should_process(event) -> bool:
@@ -27,11 +30,15 @@ async def process_message(client, event, keywords, target):
     found = match_keywords(text, keywords)
 
     if not found:
+        logger.info("Message skipped (no keywords): %s", text)
         return
+
+    logger.info("Keywords found %s in message: %s", found, text)
 
     message = format_message(found, text)
     await send_message_safe(client, target, message)
-    
+
+
 def register_handlers(client, keywords, target):
 
     @client.on(events.NewMessage)

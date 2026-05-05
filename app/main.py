@@ -2,7 +2,7 @@ import asyncio
 import logging
 from pathlib import Path
 
-from app.auth_guard import acquire_lock, release_lock, check_auth_block
+from app.auth_guard import guarded_acquire_lock, release_lock, check_auth_block
 from app.runtime import ClientRunner
 
 
@@ -35,11 +35,8 @@ async def run_app():
 
 
 if __name__ == "__main__":
-    try:
-        acquire_lock()
-    except RuntimeError as e:
-        logger.error("Cannot start application: %s", e)
-        exit(1)  # Завершаем процесс если lock не удалось захватить
+    guarded_acquire_lock()
+
     try:
         ensure_dirs()
         setup_logging()
