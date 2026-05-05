@@ -2,9 +2,8 @@ import asyncio
 import logging
 from pathlib import Path
 
-from app.auth_guard import guarded_acquire_lock, release_lock, check_auth_block
+from app.auth_guard import acquire_lock, release_lock
 from app.runtime import ClientRunner
-
 
 logger = logging.getLogger(__name__)
 
@@ -26,20 +25,16 @@ def ensure_dirs():
 
 
 async def run_app():
-    if check_auth_block():
-        logger.error("Auth is blocked. Remove STOP_AUTH.flag to continue.")
-        return
-
     runner = ClientRunner()
     await runner.run()
 
 
 if __name__ == "__main__":
-    guarded_acquire_lock()
-
     try:
+        acquire_lock()
         ensure_dirs()
         setup_logging()
         asyncio.run(run_app())
+
     finally:
         release_lock()
