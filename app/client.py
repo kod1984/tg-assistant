@@ -9,8 +9,10 @@ def create_client():
         settings.session_path,
         settings.api_id,
         settings.api_hash,
-        connection_retries=5,
-        retry_delay=3,
-        auto_reconnect=True,   # ВАЖНО: пусть держит соединение сам
+        # мягкий встроенный reconnect
+        auto_reconnect=True,
+        connection_retries=3,
+        retry_delay=5,
+
         timeout=30,
     )
